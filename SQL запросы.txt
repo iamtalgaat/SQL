@@ -1,0 +1,26 @@
+SELECT DISTINCT orders.user_id
+FROM orders
+JOIN order_lines ON order_lines.order_id = orders.order_id
+JOIN products ON products.product_id = order_lines.product_id
+WHERE orders.order_date BETWEEN '2023-08-01' AND '2023-08-15'
+  AND products.category = 'Продукция для животных'
+  AND products.product != 'Корм Kitekat для кошек, с кроликом в соусе, 85 г'
+GROUP BY orders.user_id
+HAVING COUNT(DISTINCT products.product_id) >= 2;
+
+
+
+WITH OrdersByProduct AS (
+    SELECT p.product, COUNT(*) as quantity
+    FROM products p
+    JOIN order_lines l ON l.product_id = p.product_id
+    JOIN orders o ON l.order_id = o.order_id
+    JOIN warehouses w ON o.warehouse_id = w.warehouse_id
+    WHERE w.city = 'Санкт-Петербург' 
+      AND o.order_date BETWEEN '2023-08-15' AND '2023-08-30'
+    GROUP BY p.product_id
+)
+SELECT product, quantity
+FROM OrdersByProduct
+ORDER BY quantity DESC
+LIMIT 5;
